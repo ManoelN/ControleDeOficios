@@ -19,6 +19,7 @@ import { useAuth } from './hooks/useAuth';
 function App() {
   const { user, loading: authLoading, error: authError, signIn, signUp, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'oficios' | 'capas' | 'oficios-circulares'>('oficios');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { anos, loading: loadingAnos, criarAno } = useAnos();
   const { anos: anosCapas, loading: loadingAnosCapas, criarAno: criarAnoCapas } = useAnosCapas();
@@ -63,11 +64,16 @@ function App() {
   const selectedAnoOficiosCirculares = anosOficiosCirculares.find((a) => a.id === selectedAnoOficiosCircularesId);
 
   const handleLogin = async (email: string, password: string) => {
+    setSuccessMessage(null);
     await signIn(email, password);
   };
 
   const handleRegister = async (email: string, password: string) => {
-    await signUp(email, password);
+    setSuccessMessage(null);
+    const result = await signUp(email, password);
+    if (result.success && result.message) {
+      setSuccessMessage(result.message);
+    }
   };
 
   if (authLoading) {
@@ -86,7 +92,7 @@ function App() {
   }
 
   if (!user) {
-    return <LoginPage onLogin={handleLogin} onRegister={handleRegister} error={authError} loading={authLoading} />;
+    return <LoginPage onLogin={handleLogin} onRegister={handleRegister} error={authError} success={successMessage} loading={authLoading} />;
   }
 
   if (loadingAnos || loadingAnosCapas || loadingAnosOficiosCirculares) {

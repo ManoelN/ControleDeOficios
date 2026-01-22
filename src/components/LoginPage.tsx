@@ -5,10 +5,11 @@ interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<void>;
   onRegister: (email: string, password: string) => Promise<void>;
   error: string | null;
+  success: string | null;
   loading: boolean;
 }
 
-export function LoginPage({ onLogin, onRegister, error, loading }: LoginPageProps) {
+export function LoginPage({ onLogin, onRegister, error, success, loading }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
@@ -17,6 +18,7 @@ export function LoginPage({ onLogin, onRegister, error, loading }: LoginPageProp
     e.preventDefault();
     if (isRegistering) {
       await onRegister(email, password);
+      setIsRegistering(false);
     } else {
       await onLogin(email, password);
     }
@@ -82,6 +84,12 @@ export function LoginPage({ onLogin, onRegister, error, loading }: LoginPageProp
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                {success}
               </div>
             )}
 

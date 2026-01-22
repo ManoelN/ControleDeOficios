@@ -56,14 +56,34 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        }
       });
 
       if (error) throw error;
 
-      setUser(data.user);
-      return { success: true };
+      if (!data.user) {
+        throw new Error('Erro ao criar usuário');
+      }
+
+      // Supabase pode retornar o usuário mas ainda não ter confirmado o email
+      // Se session existe, o usuário está autenticado
+      if (data.session) {
+        setUser(data.user);
+        return { success: true, message: 'Conta criada com sucesso!' };
+      } else {
+        // Se não há session, pode ser que precise confirmar email
+        return {
+          success: true,
+          message: 'Conta criada! Por favor, faça login com suas credenciais.',
+          needsLogin: true
+        };
+      }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao criar conta. Tente novamente.';
+      const errorMessage = err.message === 'User already registered'
+        ? 'Este email já está cadastrado'
+        : err.message || 'Erro ao criar conta. Tente novamente.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
