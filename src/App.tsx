@@ -17,7 +17,7 @@ import { useOficiosCirculares } from './hooks/useOficiosCirculares';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
-  const { user, loading: authLoading, error: authError, signIn, signOut } = useAuth();
+  const { user, loading: authLoading, error: authError, signIn, signUp, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'oficios' | 'capas' | 'oficios-circulares'>('oficios');
 
   const { anos, loading: loadingAnos, criarAno } = useAnos();
@@ -66,6 +66,10 @@ function App() {
     await signIn(email, password);
   };
 
+  const handleRegister = async (email: string, password: string) => {
+    await signUp(email, password);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
@@ -82,7 +86,7 @@ function App() {
   }
 
   if (!user) {
-    return <LoginPage onLogin={handleLogin} error={authError} loading={authLoading} />;
+    return <LoginPage onLogin={handleLogin} onRegister={handleRegister} error={authError} loading={authLoading} />;
   }
 
   if (loadingAnos || loadingAnosCapas || loadingAnosOficiosCirculares) {

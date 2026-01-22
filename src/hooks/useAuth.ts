@@ -48,6 +48,29 @@ export function useAuth() {
     }
   };
 
+  const signUp = async (email: string, password: string) => {
+    try {
+      setError(null);
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      setUser(data.user);
+      return { success: true };
+    } catch (err: any) {
+      const errorMessage = err.message || 'Erro ao criar conta. Tente novamente.';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setError(null);
@@ -63,6 +86,7 @@ export function useAuth() {
     loading,
     error,
     signIn,
+    signUp,
     signOut,
   };
 }

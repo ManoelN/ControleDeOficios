@@ -1,19 +1,25 @@
 import { useState } from 'react';
-import { LogIn, Lock, Mail } from 'lucide-react';
+import { LogIn, Lock, Mail, UserPlus } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (email: string, password: string) => Promise<void>;
   error: string | null;
   loading: boolean;
 }
 
-export function LoginPage({ onLogin, error, loading }: LoginPageProps) {
+export function LoginPage({ onLogin, onRegister, error, loading }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onLogin(email, password);
+    if (isRegistering) {
+      await onRegister(email, password);
+    } else {
+      await onLogin(email, password);
+    }
   };
 
   return (
@@ -87,16 +93,27 @@ export function LoginPage({ onLogin, error, loading }: LoginPageProps) {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Entrando...</span>
+                  <span>{isRegistering ? 'Criando conta...' : 'Entrando...'}</span>
                 </>
               ) : (
                 <>
-                  <LogIn className="w-5 h-5" />
-                  <span>Entrar</span>
+                  {isRegistering ? <UserPlus className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
+                  <span>{isRegistering ? 'Criar Conta' : 'Entrar'}</span>
                 </>
               )}
             </button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsRegistering(!isRegistering)}
+              disabled={loading}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium transition disabled:opacity-50"
+            >
+              {isRegistering ? 'Já tem uma conta? Entrar' : 'Criar nova conta'}
+            </button>
+          </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
             <p>Acesso restrito aos administradores da SEMAD</p>
