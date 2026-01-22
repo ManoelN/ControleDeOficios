@@ -4,9 +4,26 @@ import { supabase, Capa } from '../lib/supabase';
 export function useCapas(anoId: string | null) {
   const [capas, setCapas] = useState<Capa[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!anoId) {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const newUserId = session?.user?.id ?? null;
+      if (newUserId !== userId) {
+        setCapas([]);
+        setUserId(newUserId);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!anoId || !userId) {
       setCapas([]);
       setLoading(false);
       return;

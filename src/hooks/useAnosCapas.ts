@@ -4,10 +4,28 @@ import { supabase, AnoCapas } from '../lib/supabase';
 export function useAnosCapas() {
   const [anos, setAnos] = useState<AnoCapas[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadAnos();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      loadAnos();
+    } else {
+      setAnos([]);
+      setLoading(false);
+    }
+  }, [userId]);
 
   async function loadAnos() {
     setLoading(true);
